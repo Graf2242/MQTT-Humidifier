@@ -1,0 +1,4 @@
+{
+  "name": "My awesome thing",
+  "iot_class": ["Assumed State", "Cloud Push"]
+}

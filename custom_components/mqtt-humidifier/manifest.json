@@ -1,0 +1,8 @@
+{
+  "domain": "mqtt_humidifier",
+  "name": "MQTT humidifier integration",
+  "documentation": "https://www.example.com",
+  "dependencies": ["mqtt"],
+  "codeowners": [],
+  "requirements": []
+}
