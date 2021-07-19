@@ -33,15 +33,12 @@ from homeassistant.components.mqtt.const import (
     CONF_STATE_TOPIC,
 )
 from homeassistant.components.mqtt.mixins import (
-    CONF_COMMAND_TOPIC,
-    PLATFORMS,
-    # MqttAttributes,
     MqttAvailability,
     MqttEntity,
-    # MqttDiscoveryUpdate,
-    # MqttEntityDeviceInfo,
     subscription,
 )
+
+from homeassistant.components.mqtt import CONF_QOS, CONF_STATE_TOPIC, CONF_COMMAND_TOPIC, DOMAIN, PLATFORMS, subscription
 
 DEFAULT_NAME = "MQTT Humidifier"
 DEFAULT_PAYLOAD_ON = "ON"
