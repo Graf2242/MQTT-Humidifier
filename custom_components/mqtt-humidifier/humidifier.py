@@ -35,7 +35,7 @@ from homeassistant.components.mqtt.const import (
 from homeassistant.components.mqtt.mixins import (
     MQTT_AVAILABILITY_SCHEMA,
     MQTT_ENTITY_DEVICE_INFO_SCHEMA,
-    MQTT_JSON_ATTRS_SCHEMA,
+    # MQTT_JSON_ATTRS_SCHEMA,
     MqttAvailability,
     MqttEntity,
     subscription,
@@ -61,7 +61,7 @@ PLATFORM_SCHEMA = (
         }
     )
     .extend(MQTT_AVAILABILITY_SCHEMA.schema)
-    .extend(MQTT_JSON_ATTRS_SCHEMA.schema)
+    .extend(mqtt.MQTT_JSON_ATTRS_SCHEMA.schema)
 )
 
 
