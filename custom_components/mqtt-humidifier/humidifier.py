@@ -32,13 +32,14 @@ from homeassistant.components.mqtt.const import (
     CONF_RETAIN,
     CONF_STATE_TOPIC,
 )
-from homeassistant.components.mqtt import (
+from homeassistant.components.mqtt.mixins import (
     CONF_COMMAND_TOPIC,
     PLATFORMS,
-    MqttAttributes,
+    # MqttAttributes,
     MqttAvailability,
-    MqttDiscoveryUpdate,
-    MqttEntityDeviceInfo,
+    MqttEntity,
+    # MqttDiscoveryUpdate,
+    # MqttEntityDeviceInfo,
     subscription,
 )
 
@@ -59,8 +60,8 @@ PLATFORM_SCHEMA = (
             vol.Optional(CONF_STATE_VALUE_TEMPLATE): cv.template,
         }
     )
-        .extend(mqtt.MQTT_AVAILABILITY_SCHEMA.schema)
-        .extend(mqtt.MQTT_JSON_ATTRS_SCHEMA.schema)
+    .extend(mqtt.MQTT_AVAILABILITY_SCHEMA.schema)
+    .extend(mqtt.MQTT_JSON_ATTRS_SCHEMA.schema)
 )
 
 
@@ -88,7 +89,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             raise
 
     async_dispatcher_connect(
-        hass, MQTT_DISCOVERY_NEW.format(humidifier.DOMAIN, "mqtt"), async_discover
+        hass, MQTT_DISCOVERY_NEW.format(
+            humidifier.DOMAIN, "mqtt"), async_discover
     )
 
 
@@ -96,54 +98,31 @@ async def _async_setup_entity(
         hass, config, async_add_entities, config_entry=None, discovery_data=None
 ):
     """Set up the MQTT fan."""
-    async_add_entities([MqttHumidifier(hass, config, config_entry, discovery_data)])
+    async_add_entities(
+        [MqttHumidifier(hass, config, config_entry, discovery_data)])
 
 
 class MqttHumidifier(
-    MqttAttributes,
-    MqttAvailability,
-    MqttDiscoveryUpdate,
-    MqttEntityDeviceInfo,
+    MqttEntity,
     HumidifierEntity,
 ):
     """A MQTT fan component."""
 
     def __init__(self, hass, config, config_entry, discovery_data):
         """Initialize the MQTT fan."""
-        self.hass = hass
-        self._unique_id = config.get(CONF_UNIQUE_ID)
         self._state = False
         self._humidity = None
-        self._sub_state = None
 
         self._topic = None
         self._payload = None
         self._templates = None
 
-        # Load config
-        self._setup_from_config(config)
+        MqttEntity.__init__(self, hass, config, config_entry, discovery_data)
 
-        device_config = config.get(CONF_DEVICE)
-
-        MqttAttributes.__init__(self, config)
-        MqttAvailability.__init__(self, config)
-        MqttDiscoveryUpdate.__init__(self, discovery_data, self.discovery_update)
-        MqttEntityDeviceInfo.__init__(self, device_config, config_entry)
-
-    async def async_added_to_hass(self):
-        """Subscribe to MQTT events."""
-        await super().async_added_to_hass()
-        await self._subscribe_topics()
-
-    async def discovery_update(self, discovery_payload):
-        """Handle updated discovery message."""
-        config = PLATFORM_SCHEMA(discovery_payload)
-        self._setup_from_config(config)
-        await self.attributes_discovery_update(config)
-        await self.availability_discovery_update(config)
-        await self.device_info_discovery_update(config)
-        await self._subscribe_topics()
-        self.async_write_ha_state()
+    @staticmethod
+    def config_schema():
+        """Return the config schema."""
+        return PLATFORM_SCHEMA
 
     def _setup_from_config(self, config):
         """(Re)Setup the entity."""
@@ -214,20 +193,6 @@ class MqttHumidifier(
             self.hass, self._sub_state, topics
         )
 
-    async def async_will_remove_from_hass(self):
-        """Unsubscribe when removed."""
-        self._sub_state = await subscription.async_unsubscribe_topics(
-            self.hass, self._sub_state
-        )
-        await MqttAttributes.async_will_remove_from_hass(self)
-        await MqttAvailability.async_will_remove_from_hass(self)
-        await MqttDiscoveryUpdate.async_will_remove_from_hass(self)
-
-    @property
-    def should_poll(self):
-        """No polling needed for a MQTT fan."""
-        return False
-
     @property
     def is_on(self):
         """Return true if device is on."""
@@ -258,11 +223,6 @@ class MqttHumidifier(
         if humidity:
             self.set_humidity(humidity)
 
-    @property
-    def unique_id(self):
-        """Return a unique ID."""
-        return self._unique_id
-
     def set_humidity(self, humidity: int) -> None:
         mqtt.async_publish(
             self.hass,
@@ -276,4 +236,3 @@ class MqttHumidifier(
     def target_humidity(self):
         """Return the humidity we try to reach."""
         return self._humidity
-
