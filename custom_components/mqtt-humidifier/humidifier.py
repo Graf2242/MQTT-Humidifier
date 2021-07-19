@@ -8,7 +8,7 @@ import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 
 from homeassistant.components import humidifier, mqtt
-from homeassistant.components.humidifier import HumidifierEntity, ATTR_HUMIDITY, ATTR_AVAILABLE_MODES, ATTR_MODE
+from homeassistant.components.humidifier import HumidifierEntity, ATTR_HUMIDITY
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.typing import ConfigType, HomeAssistantType
 from homeassistant.helpers.reload import async_setup_reload_service
@@ -33,6 +33,9 @@ from homeassistant.components.mqtt.const import (
     CONF_STATE_TOPIC,
 )
 from homeassistant.components.mqtt.mixins import (
+    MQTT_AVAILABILITY_SCHEMA,
+    MQTT_ENTITY_DEVICE_INFO_SCHEMA,
+    MQTT_JSON_ATTRS_SCHEMA,
     MqttAvailability,
     MqttEntity,
     subscription,
@@ -57,8 +60,8 @@ PLATFORM_SCHEMA = (
             vol.Optional(CONF_STATE_VALUE_TEMPLATE): cv.template,
         }
     )
-    .extend(mqtt.MQTT_AVAILABILITY_SCHEMA.schema)
-    .extend(mqtt.MQTT_JSON_ATTRS_SCHEMA.schema)
+    .extend(MQTT_AVAILABILITY_SCHEMA.schema)
+    .extend(MQTT_JSON_ATTRS_SCHEMA.schema)
 )
 
 
