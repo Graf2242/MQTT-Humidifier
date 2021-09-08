@@ -5,4 +5,5 @@
   "dependencies": ["mqtt"],
   "codeowners": [],
   "requirements": []
+  "version": "0.5"
 }
